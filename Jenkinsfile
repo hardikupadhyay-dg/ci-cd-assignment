@@ -20,6 +20,7 @@ pipeline {
             sh '''
               python -m pip install --upgrade pip
               pip install pytest build
+              mkdir -p reports
               pytest -q --junitxml=reports/junit.xml
             '''
           }
@@ -54,9 +55,9 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          // Image name can be anything locally; change if you plan to push to a registry
-          def img = docker.build("calcapp:${env.BUILD_NUMBER}")
-          echo "Built image: ${img.id}"
+          // use sh instead of docker.build to avoid MissingPropertyException
+          sh "docker build -t calcapp:${env.BUILD_NUMBER} ."
+          sh "docker images | grep calcapp"
         }
       }
     }
