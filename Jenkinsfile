@@ -20,15 +20,14 @@ pipeline {
             sh '''
               python -m pip install --upgrade pip
               pip install pytest build
-              mkdir -p reports
-              pytest -q --junitxml=reports/junit.xml
+              pytest -q --junitxml=junit.xml
             '''
           }
         }
       }
       post {
         always {
-          junit 'reports/junit.xml'
+          junit 'junit.xml'
         }
       }
     }
@@ -55,9 +54,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          // use sh instead of docker.build to avoid MissingPropertyException
-          sh "docker build -t calcapp:${env.BUILD_NUMBER} ."
-          sh "docker images | grep calcapp"
+          sh 'docker build -t calcapp:${BUILD_NUMBER} .'
         }
       }
     }
