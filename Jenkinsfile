@@ -15,15 +15,12 @@ pipeline {
 
     stage('Test (in Docker)') {
       steps {
-        script {
-          docker.image('python:3.12-slim').inside {
-            sh '''
-              python -m pip install --upgrade pip
-              pip install pytest build
-              pytest -q --junitxml=junit.xml
-            '''
-          }
-        }
+        sh '''
+          docker run --rm -v $PWD:/app -w /app python:3.12-slim \
+          sh -c "python -m pip install --upgrade pip && \
+                 pip install pytest build && \
+                 pytest -q --junitxml=junit.xml"
+        '''
       }
       post {
         always {
@@ -34,15 +31,12 @@ pipeline {
 
     stage('Package (wheel)') {
       steps {
-        script {
-          docker.image('python:3.12-slim').inside {
-            sh '''
-              python -m pip install --upgrade pip
-              pip install build
-              python -m build
-            '''
-          }
-        }
+        sh '''
+          docker run --rm -v $PWD:/app -w /app python:3.12-slim \
+          sh -c "python -m pip install --upgrade pip && \
+                 pip install build && \
+                 python -m build"
+        '''
       }
       post {
         success {
@@ -53,9 +47,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        script {
-          sh 'docker build -t calcapp:${BUILD_NUMBER} .'
-        }
+        sh 'docker build -t calcapp:${BUILD_NUMBER} .'
       }
     }
   }
